@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Caligrama — Lluvia de “sé”</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --fg:#d8e2ff;
+    --emerald:#10b981;
+    --metablue:#4ea9ff;
+    --ochre:#cc7722;
+    --lakeTop:#05121c;
+    --lakeDeep:#031018;
+  }
+
+  html,body{
+    margin:0; height:100%;
+    background: radial-gradient(1200px 800px at 70% 10%, #111822 0%, var(--bg) 60%) fixed;
+    overflow:hidden; color:var(--fg);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .ui{position:fixed; inset:16px auto auto 16px; z-index:10; display:flex; gap:.5rem;}
+  .btn{
+    background:linear-gradient(180deg,#1b2a3a,#0e1a27);
+    border:none; color:#cfe8ff; font-weight:600; border-radius:12px;
+    padding:.5rem .8rem; cursor:pointer; box-shadow:0 0 10px rgba(78,169,255,.25);
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .tag{padding:.35rem .6rem; border-radius:999px; font-size:.8rem; opacity:.8;
+       background:linear-gradient(90deg,rgba(204,119,34,.2),transparent);}
+  svg{position:fixed; inset:0; width:100%; height:100%; display:block;}
+  .grain{pointer-events:none; position:fixed; inset:0; opacity:.12;
+    background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.04)0 1px,transparent 1px 3px),
+                     repeating-linear-gradient(0deg, rgba(255,255,255,.03)0 1px,transparent 1px 3px);
+  }
+  .credit{position:fixed; right:16px; bottom:12px; font-size:.8rem; opacity:.7;}
+  @keyframes shimmer{
+    0%,100%{fill-opacity:.25;}
+    50%{fill-opacity:.7;}
+  }
+</style>
+</head>
+<body>
+<div class="ui">
+  <button id="audioBtn" class="btn">▶ sonido</button>
+  <span class="tag">caligrama lluvia — sé · sii · sois · sei</span>
+</div>
+<div class="grain"></div>
+<div class="credit">“llueven voces…” — Apollinaire</div>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <filter id="glowBlue"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glowGreen"><feGaussianBlur stdDeviation="2.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="ochreEdge"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#cc7722" flood-opacity=".55"/></filter>
+    <linearGradient id="lakeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--lakeTop)"/><stop offset="100%" stop-color="var(--lakeDeep)"/>
+    </linearGradient>
+    <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(78,169,255,.9)"/><stop offset="100%" stop-color="rgba(16,185,129,.9)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Texto en arco -->
+  <path id="arc" d="M 100 180 C 450 40, 1150 40, 1500 180 S 1220 420, 800 420 S 180 520, 100 700" fill="none"/>
+  <text font-size="26" fill="url(#rimGrad)" opacity=".25" letter-spacing="1.2" filter="url(#glowBlue)">
+    <textPath xlink:href="#arc" startOffset="2%">llueven voces femeninas como si hasta en el ensueño estuvieran muertas…</textPath>
+  </text>
+
+  <g id="rain"></g>
+
+  <!-- Lago -->
+  <rect id="lake" x="0" y="740" width="1600" height="160" fill="url(#lakeGrad)"/>
+  <rect x="0" y="740" width="1600" height="2" fill="url(#rimGrad)" opacity=".75"/>
+
+  <!-- Frase latina sobre el lago -->
+  <text id="latin" x="800" y="820" text-anchor="middle"
+        font-size="40" font-family="serif" font-style="italic"
+        fill="url(#rimGrad)" filter="url(#glowGreen)"
+        style="animation:shimmer 6s ease-in-out infinite;">
+    ESTO LIMEN UNDE POSSIBILE EMERGIT
+  </text>
+  <!-- Reflejo -->
+  <text x="800" y="858" text-anchor="middle"
+        font-size="40" font-family="serif" font-style="italic"
+        fill="url(#rimGrad)" opacity=".25" transform="scale(1,-1) translate(0,-1710)">
+    ESTO LIMEN UNDE POSSIBILE EMERGIT
+  </text>
+</svg>
+
+<script>
+(function(){
+  const svgNS="http://www.w3.org/2000/svg";
+  const rainGroup=document.getElementById("rain");
+  const lakeY=740,W=1600,H=900;
+  const words=["sé","sii","sois","sei"];
+  const palette=["#10b981","#4ea9ff","#7fd1ff","#3ee7b4"];
+  const ochre="#cc7722";
+  const drops=[];const COUNT=40;
+  function r(a,b){return a+Math.random()*(b-a);}
+  function perf(){return (performance||Date).now();}
+  for(let i=0;i<COUNT;i++)drops.push(createDrop());
+  function createDrop(){
+    const g=document.createElementNS(svgNS,"text");
+    g.textContent=words[Math.floor(Math.random()*4)];
+    const c=palette[Math.floor(Math.random()*4)];
+    g.setAttribute("fill",c);
+    g.setAttribute("font-size",r(18,38));
+    g.setAttribute("font-weight","700");
+    g.setAttribute("filter","url(#glowBlue)");
+    rainGroup.appendChild(g);
+    return {el:g,x:Math.random()*W,y:r(-H,0),vy:r(60,120)/60,sway:r(-0.3,0.3)};
+  }
+  function step(){
+    const t=perf();
+    for(const d of drops){
+      d.y+=d.vy;
+      d.x+=d.sway;
+      if(d.y>lakeY){
+        d.y=r(-H,0); d.x=Math.random()*W;
+        ripple(d.x); sound(d.x);
+      }
+      d.el.setAttribute("x",d.x);
+      d.el.setAttribute("y",d.y);
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+
+  function ripple(x){
+    const c=document.createElementNS(svgNS,"circle");
+    c.setAttribute("cx",x); c.setAttribute("cy",lakeY);
+    c.setAttribute("r",2); c.setAttribute("stroke","url(#rimGrad)");
+    c.setAttribute("fill","none"); c.setAttribute("opacity",".8");
+    rainGroup.appendChild(c);
+    const st=perf(),dur=1500;
+    (function anim(){
+      const f=(perf()-st)/dur;
+      if(f>=1){c.remove();return;}
+      c.setAttribute("r",2+f*60);
+      c.setAttribute("opacity",.8*(1-f));
+      requestAnimationFrame(anim);
+    })();
+  }
+
+  // sonido 8-bit
+  let ctx=null,active=false;
+  document.getElementById("audioBtn").onclick=async()=>{
+    if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended')await ctx.resume();
+    active=true; document.getElementById("audioBtn").textContent="🔊 activo";
+  };
+  function sound(x){
+    if(!active||!ctx)return;
+    const o=ctx.createOscillator(); const g=ctx.createGain();
+    o.type="square"; o.frequency.value=200+(x/W)*800;
+    g.gain.value=.15; o.connect(g).connect(ctx.destination);
+    const n=ctx.currentTime; g.gain.exponentialRampToValueAtTime(.001,n+.2);
+    o.start(n); o.stop(n+.25);
+  }
+})();
+</script>
+</body>
+</html>
